@@ -5,7 +5,6 @@
  */
 package connectionSystem;
 
-import dragSystem.Dragable;
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -87,7 +86,11 @@ public class ConnectionSystem {
                     second.selected();
                     lastX = second.getX() + second.getWidth() / 2;
                     lastY = second.getY() + second.getHeight() / 2;
-
+                    break;
+                }
+                if (second != null) {
+                    second.unselect();
+                    second = null;
                 }
             }
 

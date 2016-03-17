@@ -6,6 +6,10 @@
 package navigation.Main;
 
 import BurningFX.CommandProvider;
+import UIElements.CityUI;
+import edu.kit.informatik.RouteGraph.RouteGraph;
+import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 /**
  *
@@ -13,6 +17,17 @@ import BurningFX.CommandProvider;
  */
 public class MainCommandProvider extends CommandProvider {
 
-   
+    RouteGraph rg;
+
+    public MainCommandProvider() {
+        rg = new RouteGraph();
+        taskExecutonar = Executors.newSingleThreadExecutor();
+    }
+
+    public void addCityToTheGraph(CityUI city, Consumer<Boolean> callback) {
+        newConcurentCommand(() -> {
+            rg.addVertex(city.name);
+        }, callback);
+    }
 
 }

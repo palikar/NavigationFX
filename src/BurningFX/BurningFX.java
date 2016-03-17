@@ -36,7 +36,10 @@ public class BurningFX {
             }
             return null;
         });
-
+    }
+    
+    public static void stopAll() {
+        comProvider.shutdown();
     }
 
 }

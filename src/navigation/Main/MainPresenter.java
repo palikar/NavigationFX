@@ -27,7 +27,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
-import javafx.util.Callback;
 import javafx.util.converter.NumberStringConverter;
 import javax.inject.Inject;
 import UIElements.CityUI;
@@ -180,9 +179,7 @@ public class MainPresenter implements Initializable {
     }
 
     private void setUpCanvas() {
-
         render();
-
     }
 
     private void newCityAdded(ListChangeListener.Change<? extends CityUI> change) {
@@ -227,7 +224,12 @@ public class MainPresenter implements Initializable {
     }
 
     public void addCity(ActionEvent e) {
-        citiesList.getItems().add(new CityUI(50, 50, "Sliven"));
+        CityUI newCity = new CityUI(50, 50, "Sliven");
+        mediator.getCommandProvider().addCityToTheGraph(newCity, (Boolean success) -> {
+            if (success) {
+                citiesList.getItems().add(newCity);
+            }
+        });
 
     }
 

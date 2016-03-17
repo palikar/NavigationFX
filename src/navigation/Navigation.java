@@ -5,6 +5,7 @@
  */
 package navigation;
 
+import BurningFX.BurningFX;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -19,7 +20,7 @@ public class Navigation extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        BurningFX.BurningFX.setUp(new MainCommandProvider());
+        BurningFX.setUp(new MainCommandProvider());
         Scene scene = new Scene(new MainView().getView());
         stage.setResizable(false);
         stage.setScene(scene);
@@ -31,6 +32,12 @@ public class Navigation extends Application {
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void stop() throws Exception {
+        super.stop(); //To change body of generated methods, choose Tools | Templates.
+        BurningFX.stopAll();
     }
 
 }
