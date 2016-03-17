@@ -1,4 +1,4 @@
-package navigation;
+package UIElements;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -15,9 +15,9 @@ import javafx.scene.paint.Color;
  */
 public class ConnectionUI {
 
-    int fromX, fromY, toX, toY;
+    public int fromX, fromY, toX, toY;
     Color color = Color.BLACK;
-    int fromCity, toCity;
+    public int fromCity, toCity;
     SimpleIntegerProperty time, dist;
 
     public ConnectionUI(int fromX, int fromY, int toX, int toY) {
@@ -27,6 +27,17 @@ public class ConnectionUI {
         this.toY = toY;
         time = new SimpleIntegerProperty(0);
         dist = new SimpleIntegerProperty(0);
+    }
+
+    public ConnectionUI(int formCity, int toCity, int fromX, int fromY, int toX, int toY) {
+        this.fromX = fromX;
+        this.fromY = fromY;
+        this.toX = toX;
+        this.toY = toY;
+        time = new SimpleIntegerProperty(0);
+        dist = new SimpleIntegerProperty(0);
+        this.fromCity = formCity;
+        this.toCity = toCity;
     }
 
     public ConnectionUI(ConnectionUI con) {
@@ -44,5 +55,19 @@ public class ConnectionUI {
         }
         gc.strokeLine(fromX, fromY, toX, toY);
     }
+
+    public SimpleIntegerProperty getTime() {
+        return time;
+    }
+
+    public SimpleIntegerProperty getDist() {
+        return dist;
+    }
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+    
+    
 
 }

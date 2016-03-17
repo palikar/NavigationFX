@@ -3,8 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package navigation;
+package UIElements;
 
+import connectionSystem.Connectable;
+import dragSystem.Dragable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -13,10 +15,10 @@ import javafx.scene.text.Font;
  *
  * @author s_stanis
  */
-public class CityUI {
+public class CityUI implements Dragable, Connectable {
 
     private static int currentId = 0;
-    public int x, y;
+    public double x, y;
     public int id;
     public String name;
     public Color secondaryColor = Color.WHITE;
@@ -28,6 +30,7 @@ public class CityUI {
         this.name = name;
     }
 
+    @Override
     public void render(GraphicsContext gc) {
         gc.setLineWidth(1);
         gc.setFill(secondaryColor);
@@ -51,6 +54,62 @@ public class CityUI {
         CityUI city = (CityUI) obj;
         return city.id == this.id;
 
+    }
+
+    @Override
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    @Override
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    @Override
+    public double getX() {
+        return x;
+    }
+
+    @Override
+    public double getY() {
+        return y;
+    }
+
+    @Override
+    public double getHeight() {
+        return 25;
+    }
+
+    @Override
+    public double getWidth() {
+        return 75;
+    }
+
+    @Override
+    public void dragged() {
+        secondaryColor = Color.RED;
+    }
+
+    @Override
+    public void unDragged() {
+        secondaryColor = Color.WHITE;
+
+    }
+
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public void selected() {
+        secondaryColor = Color.GREEN;
+    }
+
+    @Override
+    public void unselect() {
+        secondaryColor = Color.WHITE;
     }
 
 }
