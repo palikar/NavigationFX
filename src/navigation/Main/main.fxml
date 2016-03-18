@@ -3,16 +3,19 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.canvas.Canvas?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.ToggleGroup?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
@@ -92,10 +95,68 @@
                   </ScrollPane>
                </content>
           </Tab>
-          <Tab text="Untitled Tab 2">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
+          <Tab text="Operations">
+               <content>
+                  <ScrollPane prefHeight="394.0" prefWidth="200.0">
+                     <content>
+                        <VBox prefHeight="407.0" prefWidth="202.0">
+                           <children>
+                              <Label text="From City">
+                                 <font>
+                                    <Font size="17.0" />
+                                 </font>
+                              </Label>
+                              <ComboBox fx:id="fromCity" prefWidth="150.0" promptText="city" />
+                              <Label text="To City">
+                                 <font>
+                                    <Font size="17.0" />
+                                 </font>
+                              </Label>
+                              <ComboBox fx:id="toCity" prefWidth="150.0" promptText="city" />
+                              <HBox prefHeight="39.0" prefWidth="182.0" spacing="5.0">
+                                 <children>
+                                    <RadioButton fx:id="distRadio" mnemonicParsing="false" selected="true" text="Dist">
+                                       <toggleGroup>
+                                          <ToggleGroup fx:id="crit" />
+                                       </toggleGroup>
+                                    </RadioButton>
+                                    <RadioButton fx:id="timeRadio" mnemonicParsing="false" text="Time" toggleGroup="$crit" />
+                                    <RadioButton fx:id="optimalRadio" mnemonicParsing="false" text="Optimal" toggleGroup="$crit" />
+                                 </children>
+                                 <padding>
+                                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                                 </padding>
+                              </HBox>
+                              <HBox prefHeight="53.0" prefWidth="182.0" spacing="5.0">
+                                 <padding>
+                                    <Insets bottom="10.0" top="10.0" />
+                                 </padding>
+                                 <children>
+                                    <Button fx:id="search" mnemonicParsing="false" onAction="#searchClick" prefHeight="38.0" prefWidth="84.0" text="Search">
+                                       <font>
+                                          <Font size="17.0" />
+                                       </font>
+                                    </Button>
+                                    <Button fx:id="route" mnemonicParsing="false" onAction="#routeClick" prefHeight="38.0" prefWidth="91.0" text="Route">
+                                       <font>
+                                          <Font size="17.0" />
+                                       </font>
+                                    </Button>
+                                 </children>
+                              </HBox>
+                              <Button fx:id="allPaths" mnemonicParsing="false" onAction="#allPathsClick" prefHeight="19.0" prefWidth="182.0" text="All Paths">
+                                 <font>
+                                    <Font size="17.0" />
+                                 </font>
+                              </Button>
+                           </children>
+                           <padding>
+                              <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+                           </padding>
+                        </VBox>
+                     </content>
+                  </ScrollPane>
+               </content>
           </Tab>
         </tabs>
       </TabPane>
@@ -103,7 +164,7 @@
    <center>
       <Pane prefHeight="515.0" prefWidth="525.0" BorderPane.alignment="CENTER">
          <children>
-            <Canvas fx:id="canvas" height="400.0" width="400.0" />
+            <Canvas fx:id="canvas" height="515" width="525" />
          </children>
       </Pane>
    </center>
