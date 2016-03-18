@@ -31,6 +31,13 @@ import javafx.util.converter.NumberStringConverter;
 import javax.inject.Inject;
 import UIElements.CityUI;
 import UIElements.ConnectionUI;
+import java.util.Arrays;
+import java.util.List;
+import javafx.beans.value.ChangeListener;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Toggle;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.cell.ComboBoxListCell;
 
 /**
  *
@@ -60,6 +67,24 @@ public class MainPresenter implements Initializable {
     private TableColumn<ConnectionUI, String> toColumn;
     @FXML
     private Canvas canvas;
+    @FXML
+    ToggleGroup crit;
+    @FXML
+    ComboBox<CityUI> fromCity;
+    @FXML
+    ComboBox<CityUI> toCity;
+    @FXML
+    Button search;
+    @FXML
+    Button route;
+    @FXML
+    Button allPaths;
+    @FXML
+    Toggle distRadio;
+    @FXML
+    Toggle timeRadio;
+    @FXML
+    Toggle optimalRadio;
     @Inject
     MainMediator mediator;
     DragSystem dragSystem;
@@ -69,6 +94,7 @@ public class MainPresenter implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+
         this.resources = rb;
         this.gc = canvas.getGraphicsContext2D();
         dist.setEditable(false);
@@ -133,6 +159,7 @@ public class MainPresenter implements Initializable {
                 time.setEditable(true);
                 Bindings.bindBidirectional(dist.textProperty(), newValue.getDist(), new NumberStringConverter());
                 Bindings.bindBidirectional(time.textProperty(), newValue.getTime(), new NumberStringConverter());
+
                 newValue.setColor(Color.RED);
 
             } else {
@@ -158,23 +185,65 @@ public class MainPresenter implements Initializable {
             }
         });
 
-    }
+        toCity.setCellFactory((ListView<CityUI> city) -> {
+            return new ListCell<CityUI>() {
+                @Override
+                protected void updateItem(CityUI t, boolean bln) {
+                    super.updateItem(t, bln);
+                    if (t != null) {
+                        setText(t.name);
+                        // setGraphic(new Label(t.name));
+                    } else {
+                        setText("");
+                    }
+                }
+            };
+        });
+        fromCity.setCellFactory((ListView<CityUI> city) -> {
+            return new ListCell<CityUI>() {
+                @Override
+                protected void updateItem(CityUI t, boolean bln) {
+                    super.updateItem(t, bln);
+                    if (t != null) {
+                        setText(t.name);
+                    } else {
+                        setText("");
+                    }
+                }
+            };
+        });
 
-    private void addConnection(Connectable id1, Connectable id2) {
-        if (!connectionsTable.getItems().stream().anyMatch((ConnectionUI con) -> {
-            return id1.getId() == con.toCity
-                    && id2.getId() == con.fromCity
-                    || id1.getId() == con.fromCity
-                    && id2.getId() == con.toCity;
-        })) {
-            connectionsTable.getItems().add(
-                    new ConnectionUI(id1.getId(), id2.getId(),
-                            (int) id1.getX() + (int) id1.getWidth() / 2,
-                            (int) id1.getY() + (int) id1.getHeight() / 2,
-                            (int) id2.getX() + (int) id2.getWidth() / 2,
-                            (int) id2.getY() + (int) id2.getHeight() / 2));
+        toCity.setButtonCell(new ComboBoxListCell<CityUI>() {
 
-        }
+            @Override
+            public void updateItem(CityUI t, boolean bln) {
+                super.updateItem(t, bln);
+                if (t != null) {
+                    setText(t.name);
+                } else {
+                    setText("");
+                }
+            }
+
+        });
+
+        fromCity.setButtonCell(new ComboBoxListCell<CityUI>() {
+
+            @Override
+            public void updateItem(CityUI t, boolean bln) {
+                super.updateItem(t, bln);
+                if (t != null) {
+                    setText(t.name);
+                } else {
+                    setText("");
+                }
+            }
+
+        });
+
+        distRadio.setUserData("route");
+        timeRadio.setUserData("time");
+        optimalRadio.setUserData("optimal");
 
     }
 
@@ -187,6 +256,8 @@ public class MainPresenter implements Initializable {
         change.getAddedSubList().forEach(city -> {
             dragSystem.addItem(city);
             conSystem.addItem(city);
+            toCity.getItems().add(city);
+            fromCity.getItems().add(city);
         });
         render();
 
@@ -214,17 +285,21 @@ public class MainPresenter implements Initializable {
     public void removeCity(ActionEvent e) {
         CityUI selected = citiesList.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            connectionsTable.getItems().removeAll(
-                    connectionsTable.getItems().
-                    filtered((ConnectionUI con) -> con.toCity == selected.id || con.fromCity == selected.id));
-            citiesList.getItems().remove(selected);
+            mediator.getCommandProvider().removeCityToTheGraph(selected, (Boolean result) -> {
+                if (result) {
+                    citiesList.getItems().remove(selected);
+                    connectionsTable.getItems().removeAll(
+                            connectionsTable.getItems().
+                            filtered((ConnectionUI con) -> con.toCity == selected.id || con.fromCity == selected.id));
+                }
+            });
 
         }
 
     }
 
     public void addCity(ActionEvent e) {
-        CityUI newCity = new CityUI(50, 50, "Sliven");
+        CityUI newCity = new CityUI(50, 50, Math.random() * 100 + "");
         mediator.getCommandProvider().addCityToTheGraph(newCity, (Boolean success) -> {
             if (success) {
                 citiesList.getItems().add(newCity);
@@ -236,11 +311,106 @@ public class MainPresenter implements Initializable {
     public void removeConnection(ActionEvent e) {
         ConnectionUI selectedCon = connectionsTable.getSelectionModel().getSelectedItem();
         if (selectedCon != null) {
-            connectionsTable.getItems().removeAll(
-                    connectionsTable.getItems().
-                    filtered((ConnectionUI con) -> selectedCon.toCity == con.toCity && selectedCon.fromCity == con.fromCity));
+
+            CityUI city1 = citiesList.getItems().stream().filter(city -> city.id == selectedCon.fromCity).findFirst().get();
+            CityUI city2 = citiesList.getItems().stream().filter(city -> city.id == selectedCon.toCity).findFirst().get();
+            mediator.getCommandProvider().removeConnection(city1, city2, (Boolean result) -> {
+                if (result) {
+                    connectionsTable.getItems().removeAll(
+                            connectionsTable.getItems().
+                            filtered((ConnectionUI con) -> selectedCon.toCity == con.toCity && selectedCon.fromCity == con.fromCity));
+                    render();
+                }
+            });
+        }
+    }
+
+    private void addConnection(Connectable id1, Connectable id2) {
+        if (!connectionsTable.getItems().stream().anyMatch((ConnectionUI con) -> {
+            return id1.getId() == con.toCity
+                    && id2.getId() == con.fromCity
+                    || id1.getId() == con.fromCity
+                    && id2.getId() == con.toCity;
+        })) {
+            ConnectionUI newCon = new ConnectionUI(id1.getId(), id2.getId(),
+                    (int) id1.getX() + (int) id1.getWidth() / 2,
+                    (int) id1.getY() + (int) id1.getHeight() / 2,
+                    (int) id2.getX() + (int) id2.getWidth() / 2,
+                    (int) id2.getY() + (int) id2.getHeight() / 2);
+
+            CityUI city1 = citiesList.getItems().stream().filter(city -> city.id == newCon.fromCity).findFirst().get();
+            CityUI city2 = citiesList.getItems().stream().filter(city -> city.id == newCon.toCity).findFirst().get();
+
+            newCon.getDist().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+                mediator.getCommandProvider().setConnectionDist(city1, city2, newValue.intValue(), (Boolean res) -> {
+                });
+            });
+            newCon.getTime().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+                mediator.getCommandProvider().setConnectionTime(city1, city2, newValue.intValue(), (Boolean res) -> {
+                });
+            });
+            mediator.getCommandProvider().addConnection(city1, city2, (Boolean result) -> {
+                if (result) {
+                    connectionsTable.getItems().add(newCon);
+                    render();
+                }
+            });
 
         }
+
+    }
+
+    public void searchClick() {
+
+        if (toCity.getSelectionModel().isEmpty()) {
+            return;
+        }
+        if (fromCity.getSelectionModel().isEmpty()) {
+            return;
+        }
+
+        mediator.getCommandProvider().search(
+                fromCity.getValue(),
+                toCity.getValue(),
+                crit.getSelectedToggle().getUserData().toString(),
+                (Integer pathValue) -> {
+
+                    System.out.println(pathValue);
+                });
+
+    }
+
+    public void routeClick() {
+        if (toCity.getSelectionModel().isEmpty()) {
+            return;
+        }
+        if (fromCity.getSelectionModel().isEmpty()) {
+            return;
+        }
+
+        mediator.getCommandProvider().route(
+                fromCity.getValue(),
+                toCity.getValue(),
+                crit.getSelectedToggle().getUserData().toString(),
+                (Object[] path) -> {
+                    List<Object> pathList = Arrays.asList(path);
+                    for (int i = 0; i < pathList.size() - 1; i++) {
+                        colorConnection(pathList.get(i).toString(), pathList.get(i + 1).toString());
+                    }
+                });
+    }
+
+    public void allPathsClick() {
+
+    }
+
+    public void colorConnection(String city1, String city2) {
+        int id1 = citiesList.getItems().stream().filter(city -> city.name.equals(city1)).findFirst().get().id;
+        int id2 = citiesList.getItems().stream().filter(city -> city.name.equals(city2)).findFirst().get().id;
+        ConnectionUI connection = connectionsTable.getItems().stream().filter(con -> (con.fromCity == id1 && con.toCity == id2)
+                || (con.fromCity == id2 && con.toCity == id1)).findFirst().get();
+        connection.setColor(Color.RED);
+
     }
 
     private void render() {
